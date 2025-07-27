@@ -1,172 +1,184 @@
+import tkinter as tk
+from tkinter import messagebox
+
 class Node:
+    # A node in the binary search tree.
     def __init__(self, key):
         self.left = None
         self.right = None
-        self.key = key  # Use 'key' for clarity and consistency
+        self.key = key
 
+# A binary search tree with insert, delete, search, and inorder traversal.
 class BST:
     def __init__(self):
         self.root = None
 
-    def insert(self, key, verbose=True):
-        """Insert a key into the BST, showing steps if verbose."""
-        if verbose:
-            print(f"Inserting {key}:")
-        self.root = self._insert(self.root, key, verbose)
+    # Insert a key into the BST. Duplicates go to the right.
+    def insert(self, key):
+        self.root = self._insert(self.root, key)
 
-    def _insert(self, node, key, verbose, depth=0):
-        indent = '  ' * depth
+    def _insert(self, node, key):
         if node is None:
-            if verbose:
-                print(f"{indent}Node is None, inserting {key} here.")
             return Node(key)
-        if verbose:
-            print(f"{indent}At node {node.key}.")
         if key < node.key:
-            if verbose:
-                print(f"{indent}{key} < {node.key}: go left.")
-            node.left = self._insert(node.left, key, verbose, depth+1)
-        elif key > node.key:
-            if verbose:
-                print(f"{indent}{key} > {node.key}: go right.")
-            node.right = self._insert(node.right, key, verbose, depth+1)
-        else:
-            if verbose:
-                print(f"{indent}{key} == {node.key}: already exists, not inserting.")
+            node.left = self._insert(node.left, key)
+        else:  # key >= node.key - duplicates go to right
+            node.right = self._insert(node.right, key)
         return node
 
-    def inorder(self):
-        """Return the inorder traversal as a list."""
-        result = []
-        self._inorder(self.root, result)
-        return result
+    # Delete node with the given key from the BST.
+    def delete(self, key):
+        self.root, _ = self._delete(self.root, key)
 
-    def _inorder(self, node, result):
-        if node:
-            self._inorder(node.left, result)
-            result.append(node.key)
-            self._inorder(node.right, result)
-
-    def search(self, key, verbose=True):
-        """Search for a key in the BST. Returns True if found, else False. Shows steps if verbose."""
-        if verbose:
-            print(f"Searching for {key}:")
-        return self._search(self.root, key, verbose)
-
-    def _search(self, node, key, verbose, depth=0):
-        indent = '  ' * depth
+    def _delete(self, node, key):
         if node is None:
-            if verbose:
-                print(f"{indent}Node is None. {key} not found.")
-            return False
-        if verbose:
-            print(f"{indent}At node {node.key}.")
-        if key == node.key:
-            if verbose:
-                print(f"{indent}Found {key}!")
-            return True
-        elif key < node.key:
-            if verbose:
-                print(f"{indent}{key} < {node.key}: go left.")
-            return self._search(node.left, key, verbose, depth+1)
-        else:
-            if verbose:
-                print(f"{indent}{key} > {node.key}: go right.")
-            return self._search(node.right, key, verbose, depth+1)
-
-    def delete(self, key, verbose=True):
-        """Delete a key from the BST, showing steps if verbose."""
-        if verbose:
-            print(f"Deleting {key}:")
-        self.root, deleted = self._delete(self.root, key, verbose)
-        if verbose:
-            if deleted:
-                print(f"{key} deleted from BST.")
-            else:
-                print(f"{key} not found in BST.")
-
-    def _delete(self, node, key, verbose, depth=0):
-        indent = '  ' * depth
-        if node is None:
-            if verbose:
-                print(f"{indent}Node is None. {key} not found.")
             return node, False
-        if verbose:
-            print(f"{indent}At node {node.key}.")
         if key < node.key:
-            if verbose:
-                print(f"{indent}{key} < {node.key}: go left.")
-            node.left, deleted = self._delete(node.left, key, verbose, depth+1)
+            node.left, deleted = self._delete(node.left, key)
             return node, deleted
         elif key > node.key:
-            if verbose:
-                print(f"{indent}{key} > {node.key}: go right.")
-            node.right, deleted = self._delete(node.right, key, verbose, depth+1)
+            node.right, deleted = self._delete(node.right, key)
             return node, deleted
-        else:
-            if verbose:
-                print(f"{indent}Found {key}, deleting...")
-            # Node with only one child or no child
+        else:  # key == node.key - found the node to delete
+            # Case 1: No children - simply remove the node
+            if node.left is None and node.right is None:
+                return None, True
+            # Case 2: One child - replace with the child
             if node.left is None:
-                if verbose:
-                    print(f"{indent}Node has no left child. Replace with right child.")
                 return node.right, True
             elif node.right is None:
-                if verbose:
-                    print(f"{indent}Node has no right child. Replace with left child.")
                 return node.left, True
-            # Node with two children: Get the inorder successor
+            # Case 3: Two children - replace with inorder successor
             succ = self._min_value_node(node.right)
-            if verbose:
-                print(f"{indent}Node has two children. Inorder successor is {succ.key}.")
             node.key = succ.key
-            node.right, _ = self._delete(node.right, succ.key, verbose, depth+1)
+            node.right, _ = self._delete(node.right, succ.key)
             return node, True
 
     def _min_value_node(self, node):
+        # Find the leftmost node (minimum value) in the subtree.
         current = node
         while current.left is not None:
             current = current.left
         return current
 
-# User input and demo
-if __name__ == "__main__":
-    bst = BST()
-    try:
-        nums = list(map(int, input("Enter numbers to insert into BST (space-separated): ").split()))
-    except ValueError:
-        print("Invalid input. Please enter integers only.")
-        exit(1)
-    for num in nums:
-        bst.insert(num)
-    while True:
-        print("\nCurrent inorder traversal:", ' '.join(map(str, bst.inorder())))
-        print("Choose operation: [i]nsert, [s]earch, [d]elete, [q]uit")
-        op = input("Operation: ").strip().lower()
-        if op == 'i':
-            val = input("Enter number to insert: ").strip()
-            try:
-                val = int(val)
-                bst.insert(val)
-            except ValueError:
-                print("Invalid input.")
-        elif op == 's':
-            val = input("Enter number to search: ").strip()
-            try:
-                val = int(val)
-                found = bst.search(val)
-                print(f"Result: {val} {'found' if found else 'not found'} in BST.")
-            except ValueError:
-                print("Invalid input.")
-        elif op == 'd':
-            val = input("Enter number to delete: ").strip()
-            try:
-                val = int(val)
-                bst.delete(val)
-            except ValueError:
-                print("Invalid input.")
-        elif op == 'q':
-            print("Exiting.")
-            break
+    # Search for a value in the BST and return the node with the given key, or None if not found.
+    def search(self, key):
+        return self._search(self.root, key)
+
+    def _search(self, node, key):
+        if node is None:
+            return None
+        if key == node.key:
+            return node
+        elif key < node.key:
+            return self._search(node.left, key)
         else:
-            print("Unknown operation. Please choose i, s, d, or q.")
+            return self._search(node.right, key)
+
+    # Return a list of keys in sorted (inorder) order.
+    def inorder(self):
+        result = []
+        self._inorder_recursive(self.root, result)
+        return result
+
+    # Recursively traverse: left subtree, current node, right subtree.
+    def _inorder_recursive(self, node, result):
+        if node is not None:
+            self._inorder_recursive(node.left, result)
+            result.append(node.key)
+            self._inorder_recursive(node.right, result)
+
+# Uses Tkinter GUI for visualizing and interacting with a BST
+class BSTApp:
+    def __init__(self, root):
+        self.bst = BST()
+        self.root = root
+        self.root.title("BST Visualizer")
+        
+        # Create canvas for tree visualization
+        self.canvas = tk.Canvas(root, width=800, height=400, bg="white")
+        self.canvas.pack()
+
+        # Create control panel (insert, delete, search, print sorted)
+        frame = tk.Frame(root)
+        frame.pack()
+        self.entry = tk.Entry(frame, width=10)
+        self.entry.pack(side=tk.LEFT)
+        tk.Button(frame, text="Insert", command=self.insert).pack(side=tk.LEFT)
+        tk.Button(frame, text="Delete", command=self.delete).pack(side=tk.LEFT)
+        tk.Button(frame, text="Search", command=self.search).pack(side=tk.LEFT)
+        tk.Button(frame, text="Print Sorted", command=self.print_sorted).pack(side=tk.LEFT)
+
+        # Status display (shows the status of the BST)
+        self.status = tk.Label(root, text="", fg="blue")
+        self.status.pack()
+
+    # Insert a value from the entry field into the BST
+    def insert(self):
+        val = self.entry.get()
+        if not val.isdigit():
+            messagebox.showerror("Error", "Please enter an integer.")
+            return
+        val = int(val)
+        self.bst.insert(val)
+        self.status.config(text=f"Inserted {val}")
+        self.redraw()
+        self.entry.delete(0, tk.END)
+
+    # Delete a value from the BST
+    def delete(self):
+        val = self.entry.get()
+        if not val.isdigit():
+            messagebox.showerror("Error", "Please enter an integer.")
+            return
+        val = int(val)
+        self.bst.delete(val)
+        self.status.config(text=f"Deleted {val}")
+        self.redraw()
+        self.entry.delete(0, tk.END)
+
+    # Search for a value in the BST and highlight it
+    def search(self):
+        val = self.entry.get()
+        if not val.isdigit():
+            messagebox.showerror("Error", "Please enter an integer.")
+            return
+        val = int(val)
+        found_node = self.bst.search(val)
+        if found_node:
+            self.status.config(text=f"{val} found in BST.")
+        else:
+            self.status.config(text=f"{val} not found in BST.")
+        self.redraw(highlight_node=found_node)
+        self.entry.delete(0, tk.END)
+
+    # Display the BST values in sorted order
+    def print_sorted(self):
+        sorted_values = self.bst.inorder()
+        messagebox.showinfo("BST Inorder (Sorted)", " ".join(map(str, sorted_values)))
+
+    # Redraw the entire tree visualization.
+    def redraw(self, highlight_node=None):
+        self.canvas.delete("all")
+        if self.bst.root:
+            self._draw_tree(self.bst.root, 400, 40, 200, highlight_node)
+
+    # Recursively draw the tree nodes and connections
+    def _draw_tree(self, node, x, y, dx, highlight_node=None):
+        # Draw left subtree (left child)
+        if node.left:
+            self.canvas.create_line(x, y, x - dx, y + 60)
+            self._draw_tree(node.left, x - dx, y + 60, dx // 2, highlight_node)
+        # Draw right subtree (right child)
+        if node.right:
+            self.canvas.create_line(x, y, x + dx, y + 60)
+            self._draw_tree(node.right, x + dx, y + 60, dx // 2, highlight_node)
+        # Draw current node (highlighted if it's the search result)
+        color = "red" if highlight_node is not None and node is highlight_node else "lightblue"
+        self.canvas.create_oval(x - 20, y - 20, x + 20, y + 20, fill=color)
+        self.canvas.create_text(x, y, text=str(node.key), font=("Arial", 12, "bold"))
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = BSTApp(root)
+    root.mainloop() 
