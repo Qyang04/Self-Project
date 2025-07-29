@@ -11,7 +11,7 @@ A simple CLI program that demonstrates three distinct problem solutions, each wi
 ## 1. Binary Search Tree
 
 - Displays a GUI with Tkinter: including a canvas to visualize the tree, and a control panel for various operations.
-![bst_visualizer](images/bst_visualizer.png)
+![bst visualizer](images/bst_visualizer.png)
 - Contains a canvas for tree visualization, and a control panel to carry out various tree operations.
 
 
@@ -77,7 +77,7 @@ Space Savings:    75.00%
 Launching visualization window...
 ```
 
-![huffman_tree](images/huffman_tree.png)
+![huffman tree visualization](images/huffman_tree.png)
 
 
 ## 3. Coin Change Problem
