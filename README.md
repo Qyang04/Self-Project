@@ -22,7 +22,7 @@ A simple CLI program that demonstrates three distinct problem solutions, each wi
     - run predefined test cases
     - run encoding for custom input
     - exit
-Initial output:
+- Initial output:
 ```
 ╔══════════════════════════════╗
 ║   Huffman Coding Toolkit     ║
@@ -33,7 +33,7 @@ Initial output:
 Enter your choice:
 ```
 
-Option '2' is chosen, with input of 'hello:
+- Option '2' is chosen, with input of 'hello':
 ```
 --- Output Configuration ---
 Show Huffman table? (y/n): y
