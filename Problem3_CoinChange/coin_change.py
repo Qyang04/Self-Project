@@ -1,7 +1,5 @@
-import math
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
-from typing import List, Tuple, Optional
 
 def coin_change_min_coins_dp(coins, amount):
     """
